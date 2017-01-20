@@ -15,13 +15,15 @@ namespace Searching
     public class WinSearch
     {
         public IList<string> Output { get; set; }
-        public IList<RecodResult> Output2 { get; set; }
+        public List<RecodResult> Output2 { get; set; }
 
         private readonly string connectionString = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
 
         public WinSearch(string searchString = null)
         {
+            Output2 = new List<RecodResult>();
             ExecuteSearch(searchString);
+            
         }
 
 
@@ -48,7 +50,16 @@ namespace Searching
                 {
                     x += rdr.GetValue(i) + " | ";
                 }
+
                 output.Add(x);
+
+                var foo = new RecodResult();
+
+                foo.Raw = rdr.ToString();
+                foo.Path = rdr.GetValue(0).ToString();
+                foo.FileType = rdr.GetValue(1).ToString();
+
+                Output2.Add(foo);
             }
 
             rdr.Close();
@@ -59,7 +70,7 @@ namespace Searching
 
     public enum ItemType
     {
-        
+
         Folder,
         Directory,
 

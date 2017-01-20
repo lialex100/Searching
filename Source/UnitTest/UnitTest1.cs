@@ -21,6 +21,24 @@ namespace UnitTest
             watch.Stop();
             Text = watch.Elapsed.TotalSeconds.ToString();
         }
+
+        private Stopwatch watch;
+
+        [TestInitialize]
+        public void init()
+        {
+            watch = new Stopwatch();
+            watch.Start();
+        }
+
+        [TestCleanup()]
+        public void Cleanup()
+        {
+            watch.Stop();
+            Trace.WriteLine($"Method running time : {watch.Elapsed.TotalSeconds}");
+        }
+
+
         [TestMethod]
         public void PrintInitTime()
         {
@@ -43,6 +61,16 @@ namespace UnitTest
             Trace.WriteLine($"Count {search.Output.Count}");
 
         }
+
+        [TestMethod]
+        public void SaveConfig ()
+        {
+            var conf = new Config();
+            conf.Records = search.Output2;
+
+            conf.Save();
+        }
+
         [TestMethod]
 
         public void Search()

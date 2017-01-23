@@ -20,7 +20,7 @@ namespace UnitTest
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            search = new WinSearch();
+            search = new WinSearch(limitResult:20000);
             watch.Stop();
             Text = watch.Elapsed.TotalSeconds.ToString();
         }
@@ -66,6 +66,16 @@ namespace UnitTest
             Trace.WriteLine($"Count {search.Output.Count}");
 
         }
+        [TestMethod]
+        public void SpeedTest()
+        {
+            Trace.WriteLine(_Line);
+            var filter = search.Output2.Where(x => x.Path.Contains("aa", StringComparison.OrdinalIgnoreCase)).ToList();
+            filter.Count();
+            Trace.WriteLine(_Line);
+
+        }
+
 
         [TestMethod]
         public void SaveConfig ()

@@ -19,20 +19,21 @@ namespace Searching
 
         private readonly string connectionString = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
 
-        public WinSearch(string searchString = null)
+        public WinSearch(string searchString = null, int limitResult = 0)
         {
             Output2 = new List<RecodResult>();
-            ExecuteSearch(searchString);
-            
+            ExecuteSearch(searchString, limitResult);
+
         }
 
 
 
-        public void ExecuteSearch(string searchString = null)
+        public void ExecuteSearch(string searchString = null, int limitResult = 0)
         {
+            string limit = limitResult != 0 ? $" Top {limitResult} " : string.Empty;
 
             OleDbConnection conn = new OleDbConnection(connectionString);
-            OleDbCommand cmd = new OleDbCommand($"SELECT System.ItemPathDisplay, System.ItemType FROM SYSTEMINDEX "
+            OleDbCommand cmd = new OleDbCommand($"SELECT {limit} System.ItemPathDisplay, System.ItemType FROM SYSTEMINDEX "
                                                 //+ $"Where System.ItemType='{ItemType.Directory:G}'"
                                                 , conn);
 
@@ -43,6 +44,7 @@ namespace Searching
             rdr = cmd.ExecuteReader();
 
             var output = new List<string>();
+            int count = 0;
             while (rdr.Read())
             {
                 string x = string.Empty;
@@ -58,6 +60,7 @@ namespace Searching
                 foo.Raw = rdr.ToString();
                 foo.Path = rdr.GetValue(0).ToString();
                 foo.FileType = rdr.GetValue(1).ToString();
+                foo.Number = count++;
 
                 Output2.Add(foo);
             }

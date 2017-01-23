@@ -10,5 +10,6 @@ namespace Searching
         public String Raw { get; set; }
         public String Path { get; set; }  
         public String FileType { get; set; }
+        public int Number { get; set; }
     }
 }

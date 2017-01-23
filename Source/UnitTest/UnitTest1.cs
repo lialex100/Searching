@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Searching;
+using SearchingUI.Helper;
 
 namespace UnitTest
 {
@@ -11,6 +12,8 @@ namespace UnitTest
     {
         public static WinSearch search;
         public static string Text;
+
+        public readonly string _Line = "--------------------------------------------------";
 
         [ClassInitialize]
         public static void Init(TestContext testContext)
@@ -35,6 +38,7 @@ namespace UnitTest
         public void Cleanup()
         {
             watch.Stop();
+            Trace.WriteLine(_Line);
             Trace.WriteLine($"Method running time : {watch.Elapsed.TotalSeconds}");
         }
 
@@ -43,6 +47,7 @@ namespace UnitTest
         public void PrintInitTime()
         {
             Trace.WriteLine($"init time for the index : {Text}");
+            Trace.WriteLine(_Line);
         }
 
         [TestMethod]
@@ -84,6 +89,29 @@ namespace UnitTest
 
             Trace.WriteLine($"init time for the index : {Text}");
             Trace.WriteLine($"Count {search.Output.Count}");
+        }
+
+        [TestMethod]
+        public void SearchAndFilter()
+        {
+            Stopwatch watch = new Stopwatch();
+        
+
+        ///    var search = new WinSearch();
+            var _results = search.Output2;
+            Trace.WriteLine($"Orginal Count {_results.Count}");
+            watch.Start();
+            
+
+            var num = _results.Where(x => x.Path.Contains("Z", StringComparison.OrdinalIgnoreCase)).Select(x => x.Number);
+
+           
+           
+            Trace.WriteLine($"Filtered count {num.ToList().Count}");
+            watch.Stop();
+
+
+            Trace.WriteLine($"linq time for the index : {watch.Elapsed.TotalSeconds}");
         }
     }
 }

@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Searching;
-using SearchingUI.Helper;
+using Helper.Helper;
 
 namespace UnitTest
 {
@@ -20,7 +23,7 @@ namespace UnitTest
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            search = new WinSearch(limitResult:20000);
+            search = new WinSearch(limitResult: 10);
             watch.Stop();
             Text = watch.Elapsed.TotalSeconds.ToString();
         }
@@ -42,7 +45,6 @@ namespace UnitTest
             Trace.WriteLine($"Method running time : {watch.Elapsed.TotalSeconds}");
         }
 
-
         [TestMethod]
         public void PrintInitTime()
         {
@@ -62,10 +64,9 @@ namespace UnitTest
         [TestMethod]
         public void ShowCount()
         {
-
             Trace.WriteLine($"Count {search.Output.Count}");
-
         }
+
         [TestMethod]
         public void SpeedTest()
         {
@@ -73,43 +74,42 @@ namespace UnitTest
             var filter = search.Output2.Where(x => x.Path.Contains("aa", StringComparison.OrdinalIgnoreCase)).ToList();
             filter.Count();
             Trace.WriteLine(_Line);
-
         }
 
         [TestMethod]
         public void LoadConfig()
         {
             var conf = new Config();
-        
 
             var temp = conf.Load();
-
         }
 
         [TestMethod]
-        public void SaveConfig ()
+        public void SaveConfig()
         {
             var conf = new Config();
             conf.Records = search.Output2;
 
-         var temp =    conf.Save();
-
+            var temp = conf.Save();
         }
 
         [TestMethod]
         public void LoadSaveConfig()
         {
+            int numberOfRecord = 20;
+
             var conf = new Config();
-            conf.Records = search.Output2.Take(10).ToList();
-            conf.Save().s;
-            
+            conf.Records = search.Output2.Take(numberOfRecord).ToList();
+            conf.Save().Should().BeTrue();
 
+            conf.Records = null;
+            conf.Records.Should().BeNull();
 
+            conf.Load().Should().BeTrue();
+            conf.Records.Count.Should().Be(numberOfRecord);
         }
 
-
         [TestMethod]
-
         public void Search()
         {
             Stopwatch watch = new Stopwatch();
@@ -126,24 +126,43 @@ namespace UnitTest
         [TestMethod]
         public void SearchAndFilter()
         {
-            Stopwatch watch = new Stopwatch();
-        
+            var conf = new Config();
 
-        ///    var search = new WinSearch();
-            var _results = search.Output2;
+            var temp = conf.Load();
+
+            int no = 50;
+            Stopwatch watch = new Stopwatch();
+         
+            ///    var search = new WinSearch();
+     //       var _results = search.Output2;
+            var _results = conf.Records;
+
+
             Trace.WriteLine($"Orginal Count {_results.Count}");
             watch.Start();
-            
+            Regex regex = new Regex(@"a", RegexOptions.Compiled);
 
-            var num = _results.Where(x => x.Path.Contains("Z", StringComparison.OrdinalIgnoreCase)).Select(x => x.Number);
+            for (int i = 0; i < no; i++)
+            {
+                filter(_results, regex);
+            }
 
-           
-           
-            Trace.WriteLine($"Filtered count {num.ToList().Count}");
             watch.Stop();
 
+            Trace.WriteLine($"filter logic running time : {watch.Elapsed.TotalSeconds / no:R}");
+        }
 
-            Trace.WriteLine($"linq time for the index : {watch.Elapsed.TotalSeconds}");
+        public void filter(List<RecodResult> record , Regex regex)
+        {
+            //   Regex regex = new Regex(@"a", RegexOptions.IgnoreCase);
+            //   
+            //var dd = record.Where(x =>
+            //{
+            //    return regex.Match(x.Path).Success;
+            //}).ToList();
+
+            var dd = record.AsParallel().Where(x => x.Path.Contains("a", StringComparison.OrdinalIgnoreCase)).ToList();
+          //  Trace.WriteLine($"Filtered count {dd.ToList().Count}");
         }
     }
 }

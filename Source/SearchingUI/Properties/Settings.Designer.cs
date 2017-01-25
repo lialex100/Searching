@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SearchingUI.Properties
+namespace Searching.Properties
 {
 
 

@@ -6,21 +6,21 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Helper.Helper;
 using Searching;
-using SearchingUI.Helper;
 
 namespace SearchingUI
 {
     public partial class Form1 : Form
     {
-        private WinSearch _winSearch;
+      //  private WinSearch _winSearch;
         private List<RecodResult> _results;
         private List<RecodResult> _displayResults;
-        private BindingSource _bindingSource;
         private Dictionary<int, ListViewItem> dictionary = new Dictionary<int, ListViewItem>();
         private List<RecodResult> displayItem = new List<RecodResult>();
 
@@ -33,9 +33,26 @@ namespace SearchingUI
             this.listView1.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.listView1_RetrieveVirtualItem);
             this.listView1.DrawColumnHeader += new DrawListViewColumnHeaderEventHandler(this.listView1_DrawColumnHeader);
             //this.dataGridView1.CellValueNeeded += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.dataGridView1_CellValueNeeded);
+            Config conf = new Config();
 
-            _winSearch = new WinSearch("", 20);
-            _results = _winSearch.Output2;
+            if (File.Exists(conf.Filename))
+            {
+                conf.Load();
+                _results = conf.Records;
+            }
+            else
+            {
+                var WinSearch = new WinSearch("", 2000);
+                _results = WinSearch.Output2;
+                Task.Run(() =>
+                {
+                    conf.Records = _results;
+                    conf.Save();
+                });
+
+            }
+
+
             _displayResults = _results;
 
             dataGridView1.VirtualMode = true;
@@ -146,25 +163,21 @@ namespace SearchingUI
                sw.Stop();
 
                listView1.Refresh();
-               label2.Text = sw.Elapsed.TotalSeconds.ToString();
+
+               var dd = sw.Elapsed.TotalSeconds.ToString();
+              label2.Text = dd;
            });
-
-            //dataGridView1.RowCount = _displayResults.Count;
-
-
-
-            // dataGridView1.Refresh();
         }
 
         IEnumerable<RecodResult> FilterRecord(string searchText)
         {
-            return _winSearch.Output2.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            return _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
         private void ChangeRow()
         {
             string searchText = textPath.Text;
-            _displayResults = _winSearch.Output2.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
             for (int i = 0; i < _displayResults.Count; i++)
             {
                 listView1.Items[i].SubItems[0].Text = _displayResults[i].Number.ToString();
@@ -175,7 +188,7 @@ namespace SearchingUI
         private void AddRow()
         {
             string searchText = textPath.Text;
-            _displayResults = _winSearch.Output2.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
             var list = new List<ListViewItem>(1000);
             foreach (var recodResult in _displayResults)

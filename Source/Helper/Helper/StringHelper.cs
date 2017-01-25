@@ -4,11 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SearchingUI.Helper
+namespace Helper.Helper
 {
-    class StringHelper
-    {
-    }
     public static class StringExtensions
     {
         public static bool Contains(this string source, string toCheck, StringComparison comp)

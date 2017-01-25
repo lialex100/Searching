@@ -15,8 +15,7 @@ namespace Searching
     public class Config
     {
         public List<RecodResult> Records { get; set; }
-
-        private readonly string _fileName = @".\index.gz";
+        public string Filename { get; set; } = @".\index.gz";
 
         public bool SaveTofile()
         {
@@ -38,6 +37,7 @@ namespace Searching
 
         public bool Save()
         {
+
             Records.Sort((emp1, emp2) => String.Compare(emp1.Path, emp2.Path, StringComparison.Ordinal));
             JsonSerializer serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore};
 
@@ -50,7 +50,7 @@ namespace Searching
                 sw.Flush();
 
                 // write to file
-                using (FileStream f2 = new FileStream(_fileName, FileMode.Create))
+                using (FileStream f2 = new FileStream(Filename, FileMode.Create))
                 using (GZipStream gz = new GZipStream(f2, CompressionMode.Compress, false))
                 {
                     memory.WriteTo(gz);
@@ -61,7 +61,7 @@ namespace Searching
 
         public bool Load()
         {
-            using (FileStream originalFileStream = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
+            using (FileStream originalFileStream = new FileStream(Filename, FileMode.Open, FileAccess.Read))
             {
                 using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
                 {

@@ -106,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache.cs" />
+    <Compile Include="CompressStream.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="RecodResult.cs" />
     <Compile Include="WinSearch.cs" />

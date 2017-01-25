@@ -76,6 +76,15 @@ namespace UnitTest
 
         }
 
+        [TestMethod]
+        public void LoadConfig()
+        {
+            var conf = new Config();
+        
+
+            var temp = conf.Load();
+
+        }
 
         [TestMethod]
         public void SaveConfig ()
@@ -83,8 +92,21 @@ namespace UnitTest
             var conf = new Config();
             conf.Records = search.Output2;
 
-            conf.Save();
+         var temp =    conf.Save();
+
         }
+
+        [TestMethod]
+        public void LoadSaveConfig()
+        {
+            var conf = new Config();
+            conf.Records = search.Output2.Take(10).ToList();
+            conf.Save().s;
+            
+
+
+        }
+
 
         [TestMethod]
 

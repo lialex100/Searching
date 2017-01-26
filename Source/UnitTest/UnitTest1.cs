@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FluentAssertions;
@@ -161,8 +162,14 @@ namespace UnitTest
             //    return regex.Match(x.Path).Success;
             //}).ToList();
 
-            var dd = record.AsParallel().Where(x => x.Path.Contains("a", StringComparison.OrdinalIgnoreCase)).ToList();
-          //  Trace.WriteLine($"Filtered count {dd.ToList().Count}");
+           // var dd = record.AsParallel().Where(x => x.Path.Contains("a", StringComparison.OrdinalIgnoreCase)).ToList();
+            //  Trace.WriteLine($"Filtered count {dd.ToList().Count}");
+
+
+             record.AsParallel().Where(x =>
+            {
+                return CultureInfo.InvariantCulture.CompareInfo.IndexOf(x.Path, "a", 0, x.Path.Length, CompareOptions.IgnoreCase) > 0;
+            }).ToList();
         }
     }
 }

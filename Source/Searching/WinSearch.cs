@@ -58,7 +58,7 @@ namespace Searching
                 var foo = new RecodResult();
 
                 foo.Raw = rdr.ToString();
-                foo.Path = rdr.GetValue(0).ToString();
+                foo.Path = rdr.GetValue(0).ToString().Replace("\\", "/");
                 foo.FileType = rdr.GetValue(1).ToString();
                 foo.Number = count++;
 

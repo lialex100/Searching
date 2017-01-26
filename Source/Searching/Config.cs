@@ -39,7 +39,10 @@ namespace Searching
         {
 
             Records.Sort((emp1, emp2) => String.Compare(emp1.Path, emp2.Path, StringComparison.Ordinal));
-            JsonSerializer serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore};
+            var i = 0;
+            Records.ForEach(x => x.Number = i++);
+
+            JsonSerializer serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore };
 
             using (MemoryStream memory = new MemoryStream())
             using (StreamWriter sw = new StreamWriter(memory))
@@ -68,8 +71,13 @@ namespace Searching
                     StreamReader re = new StreamReader(decompressionStream);
                     using (JsonReader reader = new JsonTextReader(re))
                     {
-                        var serializer = new JsonSerializer() {NullValueHandling = NullValueHandling.Ignore};
-                        Records = serializer.Deserialize<List<RecodResult>>(reader);
+                        var serializer = new JsonSerializer() { NullValueHandling = NullValueHandling.Ignore };
+                        var temp = serializer.Deserialize<List<RecodResult>>(reader);
+                        temp.AsParallel().ForAll(x =>
+                        {
+                            x.Path = x.Path.Replace("/", "\\");
+                        });
+                        Records = temp;
                     }
                 }
             }

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Helper.Helper;
@@ -18,20 +13,81 @@ namespace SearchingUI
 {
     public partial class Form1 : Form
     {
-      //  private WinSearch _winSearch;
+        //  private WinSearch _winSearch;
         private List<RecodResult> _results;
         private List<RecodResult> _displayResults;
         private Dictionary<int, ListViewItem> dictionary = new Dictionary<int, ListViewItem>();
         private List<RecodResult> displayItem = new List<RecodResult>();
+        private ContextMenuStrip fruitContextMenuStrip;
+        private ContextMenu _myContextMenu;
+
+        void initRightClick()
+        {
+            // Create a new ContextMenuStrip control.
+            fruitContextMenuStrip = new ContextMenuStrip();
+
+            // Attach an event handler for the 
+            // ContextMenuStrip control's Opening event.
+            //     fruitContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(cms_Opening);
+
+            // Create a new ToolStrip control.
+            ToolStrip ts = new ToolStrip();
+
+            // Create a ToolStripDropDownButton control and add it
+            // to the ToolStrip control's Items collections.
+            ToolStripDropDownButton fruitToolStripDropDownButton = new ToolStripDropDownButton("Fruit", null, null, "Fruit");
+            ts.Items.Add(fruitToolStripDropDownButton);
+
+            // Dock the ToolStrip control to the top of the form.
+            ts.Dock = DockStyle.Top;
+
+            // Assign the ContextMenuStrip control as the 
+            // ToolStripDropDownButton control's DropDown menu.
+            fruitToolStripDropDownButton.DropDown = fruitContextMenuStrip;
+
+            // Create a new MenuStrip control and add a ToolStripMenuItem.
+            MenuStrip ms = new MenuStrip();
+            ToolStripMenuItem fruitToolStripMenuItem = new ToolStripMenuItem("Fruit", null, null, "Fruit");
+            ms.Items.Add(fruitToolStripMenuItem);
+
+            // Dock the MenuStrip control to the top of the form.
+            ms.Dock = DockStyle.Top;
+
+            // Assign the MenuStrip control as the 
+            // ToolStripMenuItem's DropDown menu.
+            fruitToolStripMenuItem.DropDown = fruitContextMenuStrip;
+
+            // Assign the ContextMenuStrip to the form's 
+            // ContextMenuStrip property.
+            ContextMenuStrip = fruitContextMenuStrip;
+
+            // Add the ToolStrip control to the Controls collection.
+            Controls.Add(ts);
+
+            //Add a button to the form and assign its ContextMenuStrip.
+            Button b = new Button();
+            b.Location = new Point(60, 60);
+            Controls.Add(b);
+            b.ContextMenuStrip = fruitContextMenuStrip;
+
+            // Add the MenuStrip control last.
+            // This is important for correct placement in the z-order.
+            Controls.Add(ms);
+        }
 
         public Form1()
         {
             InitializeComponent();
+            InitContextmenu();
 
-            this.listView1.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.listView1_DrawItem);
-            this.listView1.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.listView1_DrawSubItem);
-            this.listView1.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.listView1_RetrieveVirtualItem);
-            this.listView1.DrawColumnHeader += new DrawListViewColumnHeaderEventHandler(this.listView1_DrawColumnHeader);
+            listView1.DrawItem += new DrawListViewItemEventHandler(listView1_DrawItem);
+            listView1.DrawSubItem += new DrawListViewSubItemEventHandler(listView1_DrawSubItem);
+            listView1.RetrieveVirtualItem += new RetrieveVirtualItemEventHandler(listView1_RetrieveVirtualItem);
+            listView1.DrawColumnHeader += new DrawListViewColumnHeaderEventHandler(listView1_DrawColumnHeader);
+
+            //     listView1.Columns.Add("No");
+            //        listView1.Columns.Add("Path");
+
             //this.dataGridView1.CellValueNeeded += new System.Windows.Forms.DataGridViewCellValueEventHandler(this.dataGridView1_CellValueNeeded);
             Config conf = new Config();
 
@@ -42,23 +98,22 @@ namespace SearchingUI
             }
             else
             {
-                var WinSearch = new WinSearch("", 2000);
+                var WinSearch = new WinSearch("", 6000);
                 _results = WinSearch.Output2;
                 Task.Run(() =>
                 {
                     conf.Records = _results;
                     conf.Save();
                 });
-
             }
-
 
             _displayResults = _results;
 
-            dataGridView1.VirtualMode = true;
+            //dataGridView1.VirtualMode = true;
 
-            dataGridView1.RowCount = _results.Count;
+            //  dataGridView1.RowCount = _results.Count;
 
+            listView1.Columns.Add("", 100);
             listView1.Columns.Add("int", 100);
             listView1.Columns.Add("Path", 100);
             listView1.View = View.Details;
@@ -70,23 +125,29 @@ namespace SearchingUI
             foreach (var recodResult in _results)
             {
                 // var item = new ListViewItem();
-                //     var item = new ListViewItem(new string[] { recodResult.Number.ToString(), recodResult.Path });
-                var item = new ListViewItem(new string[] { recodResult.Number.ToString(), recodResult.Path });
-                //     item.Tag = recodResult;
-                //   item.SubItems[0].Name = "int";
-                //   item.SubItems[0].Text = recodResult.Number.ToString();
-                //    item.SubItems.Add(recodResult.Path);
+                //    var item = new ListViewItem(new string[] { recodResult.Number.ToString(), recodResult.Path });
 
-                //  listView1.Items.Add(item);
+                ListViewItem item = new ListViewItem();
+                //  item.im = -1;
+                // item.SubItems.Add("");
+                item.SubItems.Add(recodResult.Number.ToString());
+                item.SubItems.Add(recodResult.Path);
+
                 dictionary.Add(recodResult.Number, item);
                 displayItem.Add(recodResult);
             }
 
             listView1.VirtualListSize = _results.Count;
+            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listView1.Columns[0].Width = 70;
+
+            //   listView1.Bounds = new Rectangle(new Point(10, 10), new Size(300, 200));
         }
 
         private void listView1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
+            e.DrawDefault = true;
+            return;
 
             using (StringFormat sf = new StringFormat())
             {
@@ -105,11 +166,11 @@ namespace SearchingUI
                 // Draw the standard header background.
                 e.DrawBackground();
                 // Draw the header text.
-                using (Font headerFont =new Font("Microsoft Sans Serif", 8.25f))
+                using (Font headerFont = new Font("Microsoft Sans Serif", 8.25f))
                 {
                     var r = e.Bounds;
-                 //   r.
-                //    e.Graphics.DrawString(e.Header.Text, listView1.Font, Brushes.Black, r, sf);
+                    //   r.
+                    //    e.Graphics.DrawString(e.Header.Text, listView1.Font, Brushes.Black, r, sf);
                     Pen blackPen = new Pen(Color.FromArgb(255, 0, 0, 0), 5);
                     e.Graphics.DrawRectangle(blackPen, 10, 10, 100, 50);
                 }
@@ -119,7 +180,7 @@ namespace SearchingUI
 
         private void listView1_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
-            ListView listView = (ListView)sender;
+            ListView listView = (ListView) sender;
 
             // Check if e.Item is selected and the ListView has a focus.
             if (!listView.Focused && e.Item.Selected)
@@ -131,9 +192,7 @@ namespace SearchingUI
             }
             else
                 e.DrawDefault = true;
-
         }
-
 
         private async void textPath_TextChanged(object sender, EventArgs e)
         {
@@ -147,71 +206,73 @@ namespace SearchingUI
             //  dataGridView1.CurrentCell = null;
             // _bindingSource.SuspendBinding();
 
-            Stopwatch sw = new Stopwatch();
-
-
             //   listView1.Items.Clear();
+            var temp = textPath.Text;
+            BeginInvoke((Action) delegate()
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                //   ChangeRow();
+                //  AddRow();
 
-            this.BeginInvoke((Action)delegate ()
-           {
-               sw.Start();
-               //   ChangeRow();
-               //  AddRow();
+                displayItem = FilterRecord(temp).ToList();
+                listView1.VirtualListSize = displayItem.Count;
+                sw.Stop();
 
-               displayItem = FilterRecord(textPath.Text).ToList();
-               listView1.VirtualListSize = displayItem.Count;
-               sw.Stop();
+                listView1.Refresh();
 
-               listView1.Refresh();
-
-               var dd = sw.Elapsed.TotalSeconds.ToString();
-              label2.Text = dd;
-           });
+                var dd = sw.Elapsed.TotalSeconds.ToString();
+                label2.Text = dd;
+            });
         }
 
         IEnumerable<RecodResult> FilterRecord(string searchText)
         {
-            return _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            return _results.AsParallel().AsOrdered().Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            //return _results.AsParallel().Where(x =>
+            //{
+            //    return CultureInfo.InvariantCulture.CompareInfo.IndexOf(x.Path, searchText, 0, x.Path.Length, CompareOptions.IgnoreCase) > 0;
+            //});
         }
 
-        private void ChangeRow()
-        {
-            string searchText = textPath.Text;
-            _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
-            for (int i = 0; i < _displayResults.Count; i++)
-            {
-                listView1.Items[i].SubItems[0].Text = _displayResults[i].Number.ToString();
-                listView1.Items[i].SubItems[1].Text = _displayResults[i].Path;
-            }
-        }
+        //private void ChangeRow()
+        //{
+        //    string searchText = textPath.Text;
+        //    _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+        //    for (int i = 0; i < _displayResults.Count; i++)
+        //    {
+        //        listView1.Items[i].SubItems[0].Text = _displayResults[i].Number.ToString();
+        //        listView1.Items[i].SubItems[1].Text = _displayResults[i].Path;
+        //    }
+        //}
 
-        private void AddRow()
-        {
-            string searchText = textPath.Text;
-            _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+        //private void AddRow()
+        //{
+        //    string searchText = textPath.Text;
+        //    _displayResults = _results.Where(x => x.Path.Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            var list = new List<ListViewItem>(1000);
-            foreach (var recodResult in _displayResults)
-            {
-                list.Add(new ListViewItem(new string[] { recodResult.Number.ToString(), recodResult.Path }));
-            }
-            listView1.Items.AddRange(list.ToArray());
-        }
+        //    var list = new List<ListViewItem>(1000);
+        //    foreach (var recodResult in _displayResults)
+        //    {
+        //        list.Add(new ListViewItem(new string[] {recodResult.Number.ToString(), recodResult.Path}));
+        //    }
+        //    listView1.Items.AddRange(list.ToArray());
+        //}
 
-        private void HideRow(int from)
-        {
-            for (int i = from - 1; i < dataGridView1.RowCount; i++)
-            {
-                //  dataGridView1.Rows[i].Visible = false;
-            }
-        }
+        //private void HideRow(int from)
+        //{
+        //    for (int i = from - 1; i < dataGridView1.RowCount; i++)
+        //    {
+        //        //  dataGridView1.Rows[i].Visible = false;
+        //    }
+        //}
 
-        private BindingSource GetValue()
-        {
-            var filtered = _results.Where(x => x.Path.Contains(textPath.Text, StringComparison.OrdinalIgnoreCase));
+        //private BindingSource GetValue()
+        //{
+        //    var filtered = _results.Where(x => x.Path.Contains(textPath.Text, StringComparison.OrdinalIgnoreCase));
 
-            return new BindingSource(filtered.ToArray(), null);
-        }
+        //    return new BindingSource(filtered.ToArray(), null);
+        //}
 
         private void textFilename_TextChanged(object sender, EventArgs e)
         {
@@ -220,7 +281,7 @@ namespace SearchingUI
             //   var bindingList = new BindingList<RecodResult>(filted);
             var source = new BindingSource(filted, null);
             //  dataGridView1.DataSource = source;
-            dataGridView1.RowCount = 0;
+            //  dataGridView1.RowCount = 0;
         }
 
         //private void dataGridView1_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
@@ -261,14 +322,13 @@ namespace SearchingUI
             {
                 e.Item = new ListViewItem();
             }
-
         }
 
         private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            const int TEXT_OFFSET = 1;    // I don't know why the text is located at 1px to the right. Maybe it's only for me.
+            const int TEXT_OFFSET = 1; // I don't know why the text is located at 1px to the right. Maybe it's only for me.
 
-            ListView listView = (ListView)sender;
+            ListView listView = (ListView) sender;
 
             // Check if e.Item is selected and the ListView has a focus.
             if (!listView.Focused && e.Item.Selected)
@@ -295,6 +355,48 @@ namespace SearchingUI
             }
             else
                 e.DrawDefault = true;
+        }
+
+        private void listView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+            {
+                return;
+            }
+
+            _myContextMenu.Show(listView1, e.Location, LeftRightAlignment.Right);
+        }
+
+        private void InitContextmenu()
+        {
+            _myContextMenu = new ContextMenu();
+
+            MenuItem menuItemVS = new MenuItem("Open Visual Studio");
+            MenuItem menuItem2 = new MenuItem("Delete");
+            MenuItem menuItem3 = new MenuItem("Add quantity");
+
+            _myContextMenu.MenuItems.Add(menuItemVS);
+            _myContextMenu.MenuItems.Add(menuItem2);
+            _myContextMenu.MenuItems.Add(menuItem3);
+            //ListView.SelectedIndexCollection indexes = listView1.SelectedIndices;
+
+            //myContextMenu.MenuItems[0].Visible = true;
+            //myContextMenu.MenuItems[1].Visible = false;
+            //myContextMenu.MenuItems[2].Visible = true;
+
+            menuItemVS.Click += VS_Click;
+        }
+
+        private void VS_Click(object sender, EventArgs e)
+        {
+            ListView.SelectedIndexCollection indexes = listView1.SelectedIndices;
+            CmdCommand.OpenVisualStudio(displayItem[indexes[0]].Path);
+        }
+
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            ListView.SelectedIndexCollection indexes = listView1.SelectedIndices;
+            CmdCommand.SystemDefaultOpen(displayItem[indexes[0]].Path);
         }
     }
 }

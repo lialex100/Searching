@@ -15,11 +15,12 @@ namespace SearchingUI
     {
         //  private WinSearch _winSearch;
         private List<RecodResult> _results;
-        private List<RecodResult> _displayResults;
+        //   private List<RecodResult> _displayResults;
         private Dictionary<int, ListViewItem> dictionary = new Dictionary<int, ListViewItem>();
         private List<RecodResult> displayItem = new List<RecodResult>();
         private ContextMenuStrip fruitContextMenuStrip;
         private ContextMenu _myContextMenu;
+        private ImageList IconList = new ImageList();
 
         void initRightClick()
         {
@@ -107,31 +108,37 @@ namespace SearchingUI
                 });
             }
 
-            _displayResults = _results;
+            //  _displayResults = _results;
 
             //dataGridView1.VirtualMode = true;
 
             //  dataGridView1.RowCount = _results.Count;
 
-            listView1.Columns.Add("", 100);
+            IconList.Images.Add(Icon.ExtractAssociatedIcon("c:\\json.txt"));
+
+            //   listView1.Columns.Add("", 100);
             listView1.Columns.Add("int", 100);
             listView1.Columns.Add("Path", 100);
+            listView1.Columns.Add("Pathx", 100);
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
             listView1.OwnerDraw = true;
+            listView1.SmallImageList = IconList;
 
             listView1.VirtualMode = true;
 
             foreach (var recodResult in _results)
             {
                 // var item = new ListViewItem();
-                //    var item = new ListViewItem(new string[] { recodResult.Number.ToString(), recodResult.Path });
+                var item = new ListViewItem(new [] {recodResult.FileType, recodResult.Number.ToString(), recodResult.Path, "xxxx"});
 
-                ListViewItem item = new ListViewItem();
-                //  item.im = -1;
+                //    ListViewItem item = new ListViewItem();
+                item.ImageIndex = 0;
                 // item.SubItems.Add("");
-                item.SubItems.Add(recodResult.Number.ToString());
-                item.SubItems.Add(recodResult.Path);
+                //   item.SubItems[0].Text = "ss";
+                //   item.SubItems.Add(recodResult.Number.ToString());
+                //   item.SubItems.Add(recodResult.Path);
+                //        item.ImageIndex = 0;
 
                 dictionary.Add(recodResult.Number, item);
                 displayItem.Add(recodResult);
@@ -147,51 +154,42 @@ namespace SearchingUI
         private void listView1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
         {
             e.DrawDefault = true;
-            return;
-
-            using (StringFormat sf = new StringFormat())
-            {
-                // Store the column text alignment, letting it default
-                // to Left if it has not been set to Center or Right.
-                switch (e.Header.TextAlign)
-                {
-                    case HorizontalAlignment.Center:
-                        sf.Alignment = StringAlignment.Center;
-                        break;
-                    case HorizontalAlignment.Right:
-                        sf.Alignment = StringAlignment.Far;
-                        break;
-                }
-
-                // Draw the standard header background.
-                e.DrawBackground();
-                // Draw the header text.
-                using (Font headerFont = new Font("Microsoft Sans Serif", 8.25f))
-                {
-                    var r = e.Bounds;
-                    //   r.
-                    //    e.Graphics.DrawString(e.Header.Text, listView1.Font, Brushes.Black, r, sf);
-                    Pen blackPen = new Pen(Color.FromArgb(255, 0, 0, 0), 5);
-                    e.Graphics.DrawRectangle(blackPen, 10, 10, 100, 50);
-                }
-            }
-            return;
         }
 
         private void listView1_DrawItem(object sender, DrawListViewItemEventArgs e)
         {
-            ListView listView = (ListView) sender;
-
-            // Check if e.Item is selected and the ListView has a focus.
-            if (!listView.Focused && e.Item.Selected)
+            return;
+            if (e.State.HasFlag(ListViewItemStates.Default))
             {
-                Rectangle rowBounds = e.Bounds;
-                int leftMargin = e.Item.GetBounds(ItemBoundsPortion.Label).Left;
-                Rectangle bounds = new Rectangle(leftMargin, rowBounds.Top, rowBounds.Width - leftMargin, rowBounds.Height);
-                e.Graphics.FillRectangle(SystemBrushes.Highlight, bounds);
-            }
-            else
                 e.DrawDefault = true;
+                return;
+            }
+
+            if (e.State.HasFlag(ListViewItemStates.Selected))
+            {
+                // Draw the background and focus rectangle for a selected item.
+                //   e.Graphics.FillRectangle(Brushes.Maroon, e.Bounds);
+                e.DrawFocusRectangle();
+            }
+
+            // Draw the item text for views other than the Details view.
+            //if (listView1.View != View.Details)
+            //{
+            //    e.DrawText();
+            //}
+
+            //if ((e.State & ListViewItemStates.Selected) != 0)
+            //{
+            //    // Draw the background and focus rectangle for a selected item.
+            ////    e.Graphics.FillRectangle(SystemBrushes.ActiveCaptionText, e.Bounds);
+            //    e.DrawFocusRectangle();
+            //}
+
+            //// Draw the item text for views other than the Details view.
+            //if (listView1.View != View.Details)
+            //{
+            //    e.DrawText();
+            //}
         }
 
         private async void textPath_TextChanged(object sender, EventArgs e)
@@ -279,7 +277,7 @@ namespace SearchingUI
             var filted = _results.Where(x => x.Path.Contains(textPath.Text)).ToList();
 
             //   var bindingList = new BindingList<RecodResult>(filted);
-            var source = new BindingSource(filted, null);
+            //    var source = new BindingSource(filted, null);
             //  dataGridView1.DataSource = source;
             //  dataGridView1.RowCount = 0;
         }
@@ -313,9 +311,6 @@ namespace SearchingUI
 
             if (dictionary != null && e.ItemIndex < displayItem.Count) //&& e.ItemIndex >= firstItem && e.ItemIndex < firstItem + myCache.Length)
             {
-                //A cache hit, so get the ListViewItem from the cache instead of making a new one.
-                //dictionary[e.ItemIndex];
-
                 e.Item = dictionary[displayItem[e.ItemIndex].Number];
             }
             else
@@ -326,35 +321,78 @@ namespace SearchingUI
 
         private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
-            const int TEXT_OFFSET = 1; // I don't know why the text is located at 1px to the right. Maybe it's only for me.
-
-            ListView listView = (ListView) sender;
-
-            // Check if e.Item is selected and the ListView has a focus.
-            if (!listView.Focused && e.Item.Selected)
+            // e.DrawDefault = true;
+            // e.DrawFocusRectangle(Bounds);
+            if (e.ColumnIndex == 1) //&& e.ItemState.HasFlag(ListViewItemStates.Selected))
             {
-                Rectangle rowBounds = e.SubItem.Bounds;
-                Rectangle labelBounds = e.Item.GetBounds(ItemBoundsPortion.Label);
-                int leftMargin = labelBounds.Left - TEXT_OFFSET;
-                Rectangle bounds = new Rectangle(rowBounds.Left + leftMargin, rowBounds.Top, e.ColumnIndex == 0 ? labelBounds.Width : (rowBounds.Width - leftMargin - TEXT_OFFSET), rowBounds.Height);
-                TextFormatFlags align;
-                switch (listView.Columns[e.ColumnIndex].TextAlign)
+                using (StringFormat sf = new StringFormat
                 {
-                    case HorizontalAlignment.Right:
-                        align = TextFormatFlags.Right;
-                        break;
-                    case HorizontalAlignment.Center:
-                        align = TextFormatFlags.HorizontalCenter;
-                        break;
-                    default:
-                        align = TextFormatFlags.Left;
-                        break;
+                    FormatFlags = StringFormatFlags.LineLimit,
+                    Trimming = StringTrimming.EllipsisCharacter,
+                    LineAlignment = StringAlignment.Center
+                })
+                {
+                    var boldFont = new Font(listView1.Font, FontStyle.Bold);
+                    var location = new PointF(e.Bounds.Location.X, e.Bounds.Location.Y);
+
+                    var sizeF = e.Graphics.MeasureString("test/eee", listView1.Font);
+
+                    var location2 = new Point(e.Bounds.Location.X, e.Bounds.Location.Y);
+                    var rectangle = new Rectangle(location2, new Size(20, 17));
+
+                    sf.Alignment = StringAlignment.Near;
+                    e.Graphics.DrawImage(IconList.Images[0], e.Bounds.Location);
+
+                    var textWidth = 15;
+
+                    var textL = e.Bounds.Location;
+                    textL.X += textWidth;
+
+                    var textSize = e.Bounds.Size;
+                    textSize.Width -= textWidth;
+
+                    var r = new Rectangle(textL, textSize);
+
+                    e.Graphics.DrawString("bbbbbb", listView1.Items[0].Font, Brushes.Black, r, sf);
+                    //  e.Graphics.DrawString("bbbbbb", listView1.Font, Brushes.Black, e.Bounds, sf);
+
+                    //     location2.X += 0;
+
+                    //sizeF = e.Graphics.MeasureString("XXXX", listView1.Font);
+                    //  rectangle = new Rectangle(location2, new Size(120, 17));
+                    //     e.Graphics.DrawString("XXXX", boldFont, Brushes.Blue, rectangle, sf);
+
+                    //   StringFormat fmt = new StringFormat(StringFormatFlags.LineLimit);
+                    //    fmt.LineAlignment = StringAlignment.Center;
+                    //   fmt.Trimming = StringTrimming.EllipsisCharacter;
+                    //   fmt.Alignment = StringAlignment.Near;
+                    //       e.Graphics.DrawString(e.Item.Text + "ABCDEFG", listView1.Font, Brushes.Black, e.Bounds, sf);
+
+                    //    var size = e.Graphics.MeasureString("test/", listView1.Font);
+
+                    //    location.X += size.Width;
+                    //    e.Graphics.DrawString(e.Item.Text, listView1.Font, Brushes.Black, location, sf);
+
+                    //    //location.X += size.Width;
+                    //    //e.Graphics.DrawString("boldText", boldFont, Brushes.Black, e.Bounds, sf);
+                    //    //size = e.Graphics.MeasureString("boldText", boldFont);
+
+                    //    //location.X += size.Width;
+                    //    //e.Graphics.DrawString("/etc", this.Font, Brushes.Black, e.Bounds, sf);
+                    //    return;
+                    //}
+
+                    //StringFormat fmt = new StringFormat(StringFormatFlags.LineLimit);
+                    //fmt.LineAlignment = StringAlignment.Center;
+                    //fmt.Trimming = StringTrimming.EllipsisCharacter;
+                    //fmt.Alignment = StringAlignment.Near;
+                    //e.Graphics.DrawString(e.Item.Text + " sss s s s ", listView1.Font, Brushes.Black, e.Bounds, fmt);
+                    return;
                 }
-                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, listView.Font, bounds, SystemColors.HighlightText,
-                    align | TextFormatFlags.SingleLine | TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.WordEllipsis);
             }
-            else
-                e.DrawDefault = true;
+
+            e.DrawDefault = true;
+            return;
         }
 
         private void listView1_MouseClick(object sender, MouseEventArgs e)

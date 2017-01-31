@@ -14,7 +14,7 @@ namespace UnitTest
     [TestClass]
     public class UnitTest1
     {
-        public static WinSearch search;
+        public static WindowsSearch search;
         public static string Text;
 
         public readonly string _Line = "--------------------------------------------------";
@@ -24,7 +24,7 @@ namespace UnitTest
         {
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            search = new WinSearch(limitResult: 10);
+            search = new WindowsSearch(limitResult: 10);
             watch.Stop();
             Text = watch.Elapsed.TotalSeconds.ToString();
         }
@@ -116,7 +116,7 @@ namespace UnitTest
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
-            var search = new WinSearch("Test");
+            var search = new WindowsSearch();
             watch.Stop();
             var Text = watch.Elapsed.TotalSeconds.ToString();
 
@@ -134,7 +134,7 @@ namespace UnitTest
             int no = 50;
             Stopwatch watch = new Stopwatch();
          
-            ///    var search = new WinSearch();
+            ///    var search = new WindowsSearch();
      //       var _results = search.Output2;
             var _results = conf.Records;
 

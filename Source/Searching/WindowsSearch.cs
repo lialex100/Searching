@@ -1,41 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.OleDb;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Searching
 {
-
     //https://msdn.microsoft.com/en-us/library/bb231256(v=vs.85).aspx
     //https://github.com/LordMike/NtfsLib/tree/master/NTFSLib.Helpers
     //http://stackoverflow.com/questions/31938722/how-to-read-file-attributes-using-master-file-table-data
 
-    public class WinSearch
+    public class WindowsSearch
     {
         public IList<string> Output { get; set; }
         public List<RecodResult> Output2 { get; set; }
 
         private readonly string connectionString = "Provider=Search.CollatorDSO;Extended Properties='Application=Windows';";
 
-        public WinSearch(string searchString = null, int limitResult = 0)
+        public WindowsSearch(int limitResult = 0)
         {
             Output2 = new List<RecodResult>();
-            ExecuteSearch(searchString, limitResult);
-
+            ExecuteSearch(limitResult);
         }
 
-
-
-        public void ExecuteSearch(string searchString = null, int limitResult = 0)
+        public void ExecuteSearch(int limitResult = 0)
         {
             string limit = limitResult != 0 ? $" Top {limitResult} " : string.Empty;
 
             OleDbConnection conn = new OleDbConnection(connectionString);
             OleDbCommand cmd = new OleDbCommand($"SELECT {limit} System.ItemPathDisplay, System.ItemType FROM SYSTEMINDEX "
-                                                //+ $"Where System.ItemType='{ItemType.Directory:G}'"
-                                                , conn);
+                //+ $"Where System.ItemType='{ItemType.Directory:G}'"
+                , conn);
 
             OleDbDataReader rdr = null;
 
@@ -73,12 +65,7 @@ namespace Searching
 
     public enum ItemType
     {
-
         Folder,
         Directory,
-
-
     }
-
-
 }

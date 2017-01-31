@@ -1,21 +1,23 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 
 namespace Searching
 {
     public class RecodResult
     {
-        public RecodResult()
-        {
-            Visible = true;
-        }
+        //pimary key  or FileReferenceNumber
+        public int Number { get; set; } 
 
         [JsonIgnore]
-        public String Raw { get; set; }
-        public String Path { get; set; }  
-        public String FileType { get; set; }
-        public int Number { get; set; }
-        public bool Visible { get; set; }
+        public string Raw { get; set; }
+
+        public string FileName { get; set; }
+        public string FileType { get; set; }
+        public string Path { get; set; }
+
+        public long TimeStamp { get; set; }
+        public long FileReferenceNumber { get; set; }
+        public long ParentFileReferenceNumber { get; set; }
+        public FileAttributes FileAttributes { get; set; }
     }
 }

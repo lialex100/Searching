@@ -13,7 +13,7 @@ namespace SearchingUI
 {
     public partial class Form1 : Form
     {
-        //  private WinSearch _winSearch;
+        //  private WindowsSearch _winSearch;
         private List<RecodResult> _results;
         //   private List<RecodResult> _displayResults;
         private Dictionary<int, ListViewItem> dictionary = new Dictionary<int, ListViewItem>();
@@ -99,7 +99,7 @@ namespace SearchingUI
             }
             else
             {
-                var WinSearch = new WinSearch("", 6000);
+                var WinSearch = new WindowsSearch(6000);
                 _results = WinSearch.Output2;
                 Task.Run(() =>
                 {
@@ -130,7 +130,7 @@ namespace SearchingUI
             foreach (var recodResult in _results)
             {
                 // var item = new ListViewItem();
-                var item = new ListViewItem(new [] {recodResult.FileType, recodResult.Number.ToString(), recodResult.Path, "xxxx"});
+                var item = new ListViewItem(new[] {recodResult.FileType, recodResult.Number.ToString(), recodResult.Path, "xxxx"});
 
                 //    ListViewItem item = new ListViewItem();
                 item.ImageIndex = 0;
@@ -147,7 +147,7 @@ namespace SearchingUI
             listView1.VirtualListSize = _results.Count;
             listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listView1.Columns[0].Width = 70;
-
+            listView1.DoubleBuffer();
             //   listView1.Bounds = new Rectangle(new Point(10, 10), new Size(300, 200));
             toolStripStatusLabel1.Text = $"Count : {_results.Count}";
         }

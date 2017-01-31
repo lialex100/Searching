@@ -37,7 +37,6 @@ namespace Searching
 
         public bool Save()
         {
-
             Records.Sort((emp1, emp2) => String.Compare(emp1.Path, emp2.Path, StringComparison.Ordinal));
             var i = 0;
             Records.ForEach(x => x.Number = i++);

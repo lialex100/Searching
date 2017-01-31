@@ -114,7 +114,7 @@ namespace SearchingUI
 
             //  dataGridView1.RowCount = _results.Count;
 
-            IconList.Images.Add(Icon.ExtractAssociatedIcon("c:\\json.txt"));
+            IconList.Images.Add(Icon.ExtractAssociatedIcon("c:\\test.txt"));
 
             //   listView1.Columns.Add("", 100);
             listView1.Columns.Add("int", 100);

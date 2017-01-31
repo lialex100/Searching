@@ -149,6 +149,7 @@ namespace SearchingUI
             listView1.Columns[0].Width = 70;
 
             //   listView1.Bounds = new Rectangle(new Point(10, 10), new Size(300, 200));
+            toolStripStatusLabel1.Text = $"Count : {_results.Count}";
         }
 
         private void listView1_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)

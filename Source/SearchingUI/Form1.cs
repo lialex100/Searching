@@ -16,7 +16,7 @@ namespace SearchingUI
         //  private WindowsSearch _winSearch;
         private List<RecodResult> _results;
         //   private List<RecodResult> _displayResults;
-        private Dictionary<int, ListViewItem> dictionary = new Dictionary<int, ListViewItem>();
+        private Dictionary<long, ListViewItem> dictionary = new Dictionary<long, ListViewItem>();
         private List<RecodResult> displayItem = new List<RecodResult>();
         private ContextMenuStrip fruitContextMenuStrip;
         private ContextMenu _myContextMenu;

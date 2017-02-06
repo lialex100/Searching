@@ -6,7 +6,7 @@ namespace Searching
     public class RecodResult
     {
         //pimary key  or FileReferenceNumber
-        public int Number { get; set; } 
+        public long Number { get; set; } 
 
         [JsonIgnore]
         public string Raw { get; set; }

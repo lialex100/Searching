@@ -114,7 +114,7 @@ namespace SearchingUI
 
             //  dataGridView1.RowCount = _results.Count;
 
-            IconList.Images.Add(Icon.ExtractAssociatedIcon("c:\\test.txt"));
+        //    IconList.Images.Add(Icon.ExtractAssociatedIcon("c:\\test.txt"));
 
             //   listView1.Columns.Add("", 100);
             listView1.Columns.Add("int", 100);
@@ -342,7 +342,7 @@ namespace SearchingUI
                     var rectangle = new Rectangle(location2, new Size(20, 17));
 
                     sf.Alignment = StringAlignment.Near;
-                    e.Graphics.DrawImage(IconList.Images[0], e.Bounds.Location);
+                 //   e.Graphics.DrawImage(IconList.Images[0], e.Bounds.Location);
 
                     var textWidth = 15;
 

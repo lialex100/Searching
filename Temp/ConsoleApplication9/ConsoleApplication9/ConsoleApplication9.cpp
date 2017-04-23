@@ -103,7 +103,31 @@ void check_record(USN_RECORD * record)
 	show_record(record);
 }
 
-
+char* actionString(DWORD value) {
+	//#define FILE_ACTION_ADDED                   0x00000001   
+	//#define FILE_ACTION_REMOVED                 0x00000002   
+	//#define FILE_ACTION_MODIFIED                0x00000003   
+	//#define FILE_ACTION_RENAMED_OLD_NAME        0x00000004   
+	//#define FILE_ACTION_RENAMED_NEW_NAME        0x00000005   
+	switch (value)
+	{
+	case FILE_ACTION_ADDED:
+		return "FILE_ACTION_ADDED";
+		break;
+	case FILE_ACTION_REMOVED:
+		return "FILE_ACTION_REMOVED";
+		break;
+	case FILE_ACTION_MODIFIED:
+		return "FILE_ACTION_MODIFIED";
+		break;
+	case FILE_ACTION_RENAMED_OLD_NAME:
+		return "FILE_ACTION_RENAMED_OLD_NAME";
+		break;
+	case FILE_ACTION_RENAMED_NEW_NAME:
+		return "FILE_ACTION_RENAMED_NEW_NAME";
+		break;
+	}
+}
 
 
 
@@ -118,31 +142,67 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	DWORD dwBufferLength = 10000;
+	DWORD dwBufferLength = 32 * 1024;
 	BYTE *pBuffer = new BYTE[dwBufferLength];
 
 	while (true) {
 		DWORD dwBytesReturned;
 
-		if (!ReadDirectoryChangesW(hDir, pBuffer, dwBufferLength, TRUE, FILE_NOTIFY_CHANGE_FILE_NAME  | FILE_NOTIFY_CHANGE_DIR_NAME, &dwBytesReturned, nullptr, nullptr)) {
-			wcout << L"Failed to read directory changes" << endl;
-			break;
-		}
+		//if (!ReadDirectoryChangesW(hDir, pBuffer, dwBufferLength, TRUE, 
+		//	FILE_NOTIFY_CHANGE_ATTRIBUTES |
+		//	FILE_NOTIFY_CHANGE_DIR_NAME | // creating, deleting a directory or sub
+		//	FILE_NOTIFY_CHANGE_FILE_NAME, // renaming,creating,deleting a file
+		//	 &dwBytesReturned, nullptr, nullptr)) {
+		//	wcout << L"Failed to read directory changes" << endl;
+		//	break;
+		//}
 
-		FILE_NOTIFY_INFORMATION *info = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(pBuffer);
+		//FILE_NOTIFY_INFORMATION *info = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(pBuffer);
+		size_t nBufSize = 32 * 1024;
+		FILE_NOTIFY_INFORMATION* pBuffer = (FILE_NOTIFY_INFORMATION*)calloc(1, nBufSize);
+		FILE_NOTIFY_INFORMATION* pBufferCurrent;
 
-		do {
+		while (ReadDirectoryChangesW(hDir,
+			pBuffer,
+			nBufSize,
+			TRUE,
+			// filter conditions
+		//	FILE_NOTIFY_CHANGE_SECURITY |
+		//	FILE_NOTIFY_CHANGE_SIZE |  // in file or subdir
+		//	FILE_NOTIFY_CHANGE_ATTRIBUTES |
+			FILE_NOTIFY_CHANGE_DIR_NAME | // creating, deleting a directory or sub
+			FILE_NOTIFY_CHANGE_FILE_NAME, // renaming,creating,deleting a file,
+			&dwBytesReturned,
+			NULL,
+			NULL
+		))
+		{
 
-			if (info->Action == FILE_ACTION_ADDED | info->Action ==  FILE_ACTION_REMOVED | info->Action == FILE_ACTION_RENAMED_OLD_NAME | info->Action == FILE_ACTION_RENAMED_NEW_NAME)
+			pBufferCurrent = pBuffer;
+			while (pBufferCurrent)
 			{
-				wstring str(info->FileName, info->FileNameLength / sizeof(wchar_t));
-
-
-				wcout << "Action : " << info->Action <<"|"<<str.c_str() << endl;
+				wstring str(pBufferCurrent->FileName, pBufferCurrent->FileNameLength / sizeof(wchar_t));
+				wcout << "Action : " << actionString(pBufferCurrent->Action) << " \t|" << str.c_str() << endl;
 				//printf(" %ls", str.c_str());
-				info = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(reinterpret_cast<BYTE *>(info) + info->NextEntryOffset);
+				// walk the buffer
+				if (pBufferCurrent->NextEntryOffset)
+					pBufferCurrent = (FILE_NOTIFY_INFORMATION*)(((BYTE*)pBufferCurrent) + pBufferCurrent->NextEntryOffset);
+				else
+					pBufferCurrent = NULL;
 			}
-		} while (info->NextEntryOffset > 0);
+		}
+		//do {
+
+		//	if (info->Action == FILE_ACTION_ADDED | info->Action == FILE_ACTION_REMOVED | info->Action == FILE_ACTION_RENAMED_OLD_NAME | info->Action == FILE_ACTION_RENAMED_NEW_NAME)
+		//	{
+		//		wstring str(info->FileName, info->FileNameLength / sizeof(wchar_t));
+
+
+		//		wcout << "Action : " << actionString(info->Action) << " \t|" << str.c_str() << endl;
+		//		//printf(" %ls", str.c_str());
+		//		info = reinterpret_cast<FILE_NOTIFY_INFORMATION *>(reinterpret_cast<BYTE *>(info) + info->NextEntryOffset);
+		//	}
+		//} while (info->NextEntryOffset > 0);
 
 		Sleep(1000);
 	}
@@ -179,11 +239,14 @@ int main(int argc, char ** argv)
 				printf("File Modified: %ls", strFileNotifyInfo[i].FileName);
 			}
 
-		
+
 			printf("Loop: %d \n", nCounter++);
 		}
 	}
 }
+
+
+
 int mainZ(int argc, char ** argv)
 {
 	MFT_ENUM_DATA mft_enum_data;
